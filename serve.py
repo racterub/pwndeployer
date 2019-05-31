@@ -93,11 +93,11 @@ EXPOSE 9999
             f.write(runsh)
         with open(base_dir+'/ctf.xinetd', 'w') as f:
             f.write(ctf_xinetd)
-        data = {"build": "chal/%s" % chal[i], "ulimit": {"nproc": ["1024:2048"]}, "ports": ["%d:9999" % port]}
+        data = {"build": "chal/%s" % chal[i], "ulimits": {"nproc": 1024}, "ports": ["%d:9999" % port]}
         config['services'][chal[i]] = data
         port += 1
     with open('docker-compose.yml', 'w') as f:
-        f.write(yaml.dump({"version": 3}) + yaml.dump(config))
+        f.write(yaml.dump({"version": '3'}) + yaml.dump(config))
 
 
 
@@ -114,4 +114,4 @@ if __name__ == "__main__":
     #         config = json.load(conf)
     #         run_docker()
     # except FileNotFoundError:
-    #     
+    #
