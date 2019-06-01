@@ -22,8 +22,7 @@ optional arguments:
 ```
 
 # Example
-`./serve.py chal/ 9000 ubuntu:16.04`
-`docker-compose up`
+`./serve.py chal/ 9000 ubuntu:16.04 && docker-compose up`
 
 
 see old version at https://github.com/racterub/ctf-pwn-deployer.
