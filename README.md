@@ -5,7 +5,7 @@ This is a automatic deployer for pwn challenges in CTF.
 
 Based on docker and xinetd, written in python3
 
-# Usage:
+# Usage: 
 ```
 usage: serve.py [-h] [-t TIMEOUT] path port image
 
@@ -20,6 +20,9 @@ optional arguments:
   -t TIMEOUT, --timeout TIMEOUT
                         Set timeout limit
 ```
+
+# Example
+`./serve.py chal/ 9000 ubuntu:16.04 && docker-compose up`
 
 
 see old version at https://github.com/racterub/ctf-pwn-deployer.
