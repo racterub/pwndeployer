@@ -5,7 +5,7 @@ This is a automatic deployer for pwn challenges in CTF.
 
 Based on docker and xinetd, written in python3
 
-# Usage: 
+# Usage:
 ```
 usage: serve.py [-h] [-t TIMEOUT] path port image
 
