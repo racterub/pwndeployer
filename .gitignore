@@ -2,3 +2,4 @@ test/*
 *.pyc
 *.swp
 .DS_Store
+chal/*
