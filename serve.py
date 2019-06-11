@@ -14,8 +14,8 @@ import shutil
 def parseParam():
     parser = ArgumentParser()
     parser.add_argument("path", help="Path to challenges")
-    parser.add_argument("port", help="Pwn challenges' serving port (Default => 6000)", type=int, default=6000)
-    parser.add_argument("image", help="Docker base image for your pwn challenges (Default => ubuntu:18.04)", default="ubuntu:18.04")
+    parser.add_argument("port", help="Pwn challenges' starting port (Default => 6000)", type=int, default=6000)
+    parser.add_argument("image", help="Docker base image for your pwn challenges (Default => ubuntu:18.04) or do just do <img>:<tag>", default="ubuntu:18.04")
     parser.add_argument("-t", "--timeout", help="Set timeout limit", default=0, dest="timeout")
     args = parser.parse_args()
     return args.path, args.port, args.image, args.timeout
