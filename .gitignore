@@ -3,3 +3,4 @@ test/*
 *.swp
 .DS_Store
 chal/*
+docker-compose.yml
