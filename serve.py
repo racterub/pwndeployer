@@ -13,20 +13,33 @@ import shutil
 
 def parseParam():
     parser = ArgumentParser()
-    parser.add_argument("path", help="Path to challenges")
-    parser.add_argument("port", help="Pwn challenges' starting port (Default => 6000)", type=int, default=6000)
-    parser.add_argument("image", help="Docker base image for your pwn challenges (Default => ubuntu:18.04) or do just do <img>:<tag>", default="ubuntu:18.04")
+    parser.add_argument("-d", "--dir", help="Path to challenges", default="chal/", dest="path")
+    parser.add_argument("-p", "--port", help="Pwn challenges' starting port (Default => 6000)", type=int, default=6000, dest="port")
+    parser.add_argument("-i", "--img", help="Docker base image for your pwn challenges (Default => ubuntu:18.04) or do just do <img>:<tag>", default="ubuntu:18.04", dest="img")
     parser.add_argument("-t", "--timeout", help="Set timeout limit", default=0, dest="timeout")
+    parser.add_argument("-g", "--gen-conf", help="Generate docker-compose.yml", action="store_true", dest="genConf")
     args = parser.parse_args()
-    return args.path, args.port, args.image, args.timeout
+    return args
+
+def genConf(path, port, image, timeout)
+    config = {"services": {}}
+    base = os.path.dirname(os.path.abspath(__file__)) + "/%s" % path
+    chal = [f for f in os.listdir(base)]
+    for i in range(len(chal)):
+        baseDir = base + chal[i]
+        data = {"build": "chal/%s" % chal[i], "ulimits": {"nproc": 1024}, "ports": ["%d:9999" % port]}
+        config['services'][chal[i]] = data
+        port += 1
+        with open('docker-compose.yml', 'w') as f:
+            f.write(yaml.dump({"version": '3'}) + yaml.dump(config))
 
 def setup(path, port, image, timeout):
     config = {"services": {}}
     base = os.path.dirname(os.path.abspath(__file__)) + "/%s" % path
     chal = [f for f in os.listdir(base)]
     for i in range(len(chal)):
-        base_dir = base + chal[i]
-        os.mkdir(base_dir+"/bin/")
+        baseDir = base + chal[i]
+        os.mkdir(baseDir+"/bin/")
         dockerfile = """FROM %s
 
 RUN apt-get update && apt-get -y dist-upgrade
@@ -67,7 +80,7 @@ CMD ["/start.sh"]
 EXPOSE 9999
 """ % image
         with open('xinetd_setting', 'r') as setting:
-            ctf_xinetd = setting.read()
+            ctfXinetd = setting.read()
 
         if timeout:
                 runsh = '''#!/bin/sh
@@ -79,20 +92,20 @@ EXPOSE 9999
             exec 2>/dev/null
             ./%s''' % chal[i]
 
-        shutil.move(base_dir+"/%s" % chal[i], base_dir+'/bin/')
-        shutil.move(base_dir+"/flag", base_dir+'/bin/')
-        os.chmod(base_dir+'/bin/%s' % chal[i], 0o755)
+        shutil.move(baseDir+"/%s" % chal[i], baseDir+'/bin/')
+        shutil.move(baseDir+"/flag", baseDir+'/bin/')
+        os.chmod(baseDir+'/bin/%s' % chal[i], 0o755)
         with open('start.sh') as f:
             startsh = f.read()
 
-        with open(base_dir+'/start.sh', 'w') as f:
+        with open(baseDir+'/start.sh', 'w') as f:
             f.write(startsh)
-        with open(base_dir+'/Dockerfile', 'w') as f:
+        with open(baseDir+'/Dockerfile', 'w') as f:
             f.write(dockerfile)
-        with open(base_dir+'/bin/run.sh', 'w') as f:
+        with open(baseDir+'/bin/run.sh', 'w') as f:
             f.write(runsh)
-        with open(base_dir+'/ctf.xinetd', 'w') as f:
-            f.write(ctf_xinetd)
+        with open(baseDir+'/ctf.xinetd', 'w') as f:
+            f.write(ctfXinetd)
         data = {"build": "chal/%s" % chal[i], "ulimits": {"nproc": 1024}, "ports": ["%d:9999" % port]}
         config['services'][chal[i]] = data
         port += 1
@@ -103,15 +116,12 @@ EXPOSE 9999
 
 
 if __name__ == "__main__":
-    path, port, image, time = parseParam()
+    arg = parseParam()
     if os.path.isdir(path):
-        setup(path, port,image, time)
+        if arg.gen_conf:
+            genConf(arg.path, arg.port, arg.image, arg.time)
+        else:
+            setup(arg.path, arg.port, arg.image, arg.time)
     else:
         print("Invalid input")
         sys.exit(-1)
-    # try:
-    #     with open('a') as conf:
-    #         config = json.load(conf)
-    #         run_docker()
-    # except FileNotFoundError:
-    #
