@@ -14,3 +14,7 @@ for d in `find chal/* -type d -maxdepth 0`; do
     mv ${d}/bin/* ${d}/;
     rm -r ${d}/bin;
 done;
+
+if [ -d libc ]; then
+    rm -r libc/;
+fi
