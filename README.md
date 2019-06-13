@@ -7,22 +7,19 @@ Based on docker and xinetd, written in python3
 
 # Usage:
 ```
-usage: serve.py [-h] [-t TIMEOUT] path port image
-
-positional arguments:
-  path                  Path to challenges
-  port                  Pwn challenges' starting port (Default => 6000)
-  image                 Docker base image for your pwn challenges (Default =>
-                        ubuntu:18.04) or just do <img>:<tag>
+usage: serve.py [-h] [-d PATH] [-p PORT] [-i IMAGE] [-t TIME] [-g]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -t TIMEOUT, --timeout TIMEOUT
+  -d PATH, --dir PATH   Path to challenges
+  -p PORT, --port PORT  Pwn challenges' starting port (Default => 6000)
+  -i IMAGE, --img IMAGE
+                        Docker base image for your pwn challenges (Default =>
+                        ubuntu:18.04) or do just do <img>:<tag>
+  -t TIME, --timeout TIME
                         Set timeout limit
+  -g, --gen-conf        Generate docker-compose.yml
 ```
-
-# Example
-`./serve.py chal/ 9000 ubuntu:16.04 && docker-compose up`
 
 
 see old version at https://github.com/racterub/ctf-pwn-deployer.
