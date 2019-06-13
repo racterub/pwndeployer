@@ -16,5 +16,5 @@ for d in `find chal/* -type d -maxdepth 0`; do
 done;
 
 if [ -d libc ]; then
-    sudo rm -r libc/;
+    rm -r libc/;
 fi
