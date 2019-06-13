@@ -15,29 +15,31 @@ def parseParam():
     parser = ArgumentParser()
     parser.add_argument("-d", "--dir", help="Path to challenges", default="chal/", dest="path")
     parser.add_argument("-p", "--port", help="Pwn challenges' starting port (Default => 6000)", type=int, default=6000, dest="port")
-    parser.add_argument("-i", "--img", help="Docker base image for your pwn challenges (Default => ubuntu:18.04) or do just do <img>:<tag>", default="ubuntu:18.04", dest="img")
-    parser.add_argument("-t", "--timeout", help="Set timeout limit", default=0, dest="timeout")
-    parser.add_argument("-g", "--gen-conf", help="Generate docker-compose.yml", action="store_true", dest="genConf")
+    parser.add_argument("-i", "--img", help="Docker base image for your pwn challenges (Default => ubuntu:18.04) or do just do <img>:<tag>", default="ubuntu:18.04", dest="image")
+    parser.add_argument("-t", "--timeout", help="Set timeout limit", default=0, dest="time")
+    parser.add_argument("-g", "--gen-conf", help="Generate docker-compose.yml", action="store_true", dest="gen_conf")
     args = parser.parse_args()
     return args
 
-def genConf(path, port, image, timeout)
+def genConf(path, port, image, timeout):
     config = {"services": {}}
     base = os.path.dirname(os.path.abspath(__file__)) + "/%s" % path
     chal = [f for f in os.listdir(base)]
     for i in range(len(chal)):
         baseDir = base + chal[i]
-        data = {"build": "chal/%s" % chal[i], "ulimits": {"nproc": 1024}, "ports": ["%d:9999" % port]}
+        data = {"build": "chal/%s" % chal[i], "volumes": ["./libc/%s:/opt/libc" % chal[i]], "ulimits": {"nproc": 1024}, "ports": ["%d:9999" % port]}
         config['services'][chal[i]] = data
         port += 1
         with open('docker-compose.yml', 'w') as f:
             f.write(yaml.dump({"version": '3'}) + yaml.dump(config))
 
 def setup(path, port, image, timeout):
+    os.mkdir("libc")
     config = {"services": {}}
     base = os.path.dirname(os.path.abspath(__file__)) + "/%s" % path
     chal = [f for f in os.listdir(base)]
     for i in range(len(chal)):
+        os.mkdir("libc/%s" % chal[i])
         baseDir = base + chal[i]
         os.mkdir(baseDir+"/bin/")
         dockerfile = """FROM %s
@@ -60,6 +62,9 @@ RUN chmod 740 /home/ctf/flag
 RUN cp -R /lib* /home/ctf
 RUN cp -R /usr/lib* /home/ctf
 
+RUN mkdir /var/opt/libc
+RUN cp /lib/x86_64-linux-gnu/libc.so.6 /var/opt/libc/libc64
+RUN cp /lib32/libc.so.6 /var/opt/libc/lib32
 RUN mkdir /home/ctf/dev
 RUN mknod /home/ctf/dev/null c 1 3
 RUN mknod /home/ctf/dev/zero c 1 5
@@ -106,7 +111,7 @@ EXPOSE 9999
             f.write(runsh)
         with open(baseDir+'/ctf.xinetd', 'w') as f:
             f.write(ctfXinetd)
-        data = {"build": "chal/%s" % chal[i], "ulimits": {"nproc": 1024}, "ports": ["%d:9999" % port]}
+        data = {"build": "chal/%s" % chal[i], "volumes": ["./libc/%s:/opt/libc" % chal[i]], "ulimits": {"nproc": 1024}, "ports": ["%d:9999" % port]}
         config['services'][chal[i]] = data
         port += 1
     with open('docker-compose.yml', 'w') as f:
@@ -117,7 +122,7 @@ EXPOSE 9999
 
 if __name__ == "__main__":
     arg = parseParam()
-    if os.path.isdir(path):
+    if os.path.isdir(arg.path):
         if arg.gen_conf:
             genConf(arg.path, arg.port, arg.image, arg.time)
         else:
